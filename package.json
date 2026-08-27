@@ -1,0 +1,13 @@
+{
+  "name": "sticky-notes-vercel-postgres",
+  "version": "1.0.0",
+  "description": "Secure Sticky Notes Application with Vercel Postgres Integration",
+  "main": "app.js",
+  "scripts": {
+    "start": "npx serve ."
+  },
+  "dependencies": {
+    "@vercel/postgres": "^0.8.0",
+    "pg": "^8.11.3"
+  }
+}

@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Sticky Notes</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- PASSWORD LOCK SCREEN -->
+    <div id="lock-screen" class="lock-screen">
+        
+        <!-- FIRST TIME SETUP: CREATE ACCOUNT CARD WITH COUNTRY CODE & MOBILE -->
+        <div id="create-password-card" class="lock-card hidden">
+            <div class="lock-icon-wrapper">
+                <i class="fa-solid fa-user-plus"></i>
+            </div>
+            <h2>Create Sticky Notes Account</h2>
+            <p>Select country code, enter mobile number & create password:</p>
+            
+            <form id="create-password-form" onsubmit="return false;">
+                <!-- COUNTRY CODE & MOBILE NUMBER INPUT -->
+                <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+                    <select id="country-code-select" style="width: 110px; padding: 12px 8px; background: rgba(15,23,42,0.6); border: 1px solid var(--border-color); border-radius: var(--radius-md); color: #fff; font-size: 14px; outline: none; cursor: pointer;">
+                        <option value="+91">🇮🇳 +91</option>
+                        <option value="+1">🇺🇸 +1</option>
+                        <option value="+44">🇬🇧 +44</option>
+                        <option value="+971">🇦🇪 +971</option>
+                        <option value="+61">🇦🇺 +61</option>
+                    </select>
+                    <div class="input-group" style="flex: 1; margin-bottom: 0;">
+                        <i class="fa-solid fa-mobile-screen-button input-icon"></i>
+                        <input type="tel" id="mobile-number-input" placeholder="Mobile Number..." maxlength="10" autocomplete="off" autofocus>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <i class="fa-solid fa-lock input-icon"></i>
+                    <input type="password" id="new-password-input" placeholder="Create password..." autocomplete="off">
+                </div>
+                <div class="input-group">
+                    <i class="fa-solid fa-shield-halved input-icon"></i>
+                    <input type="password" id="confirm-password-input" placeholder="Confirm password..." autocomplete="off">
+                </div>
+                <div id="create-error-message" class="error-message">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Invalid mobile number or passwords do not match!
+                </div>
+                <button type="submit" id="save-password-btn" class="unlock-btn">
+                    <span>Create Account & Save</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </form>
+        </div>
+
+        <!-- SUBSEQUENT TIME: LOGIN / UNLOCK CARD -->
+        <div id="login-password-card" class="lock-card hidden">
+            <div class="lock-icon-wrapper">
+                <i class="fa-solid fa-user-lock"></i>
+            </div>
+            <h2>Secure Sticky Notes</h2>
+            <p id="login-user-phone-subtitle">Enter your password to unlock notes</p>
+            
+            <form id="lock-form" onsubmit="return false;">
+                <div class="input-group">
+                    <i class="fa-solid fa-key input-icon"></i>
+                    <input type="password" id="password-input" placeholder="Enter password..." autocomplete="off" autofocus>
+                    <button type="button" id="toggle-password-btn" class="icon-btn-toggle" title="Show/Hide Password">
+                        <i class="fa-regular fa-eye"></i>
+                    </button>
+                </div>
+                <div id="error-message" class="error-message">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Incorrect password! Please try again.
+                </div>
+                <button type="submit" id="unlock-btn" class="unlock-btn">
+                    <span>Unlock Notes</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </form>
+            <div style="margin-top: 18px; display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                <button type="button" id="open-forgot-pass-btn" class="btn btn-secondary btn-sm" style="font-size: 12px; color: #818cf8;" title="Forgot Password?">
+                    <i class="fa-solid fa-comment-sms"></i> Forgot Password?
+                </button>
+                <button type="button" id="open-change-pass-login-btn" class="btn btn-secondary btn-sm" style="font-size: 12px; opacity: 0.85;" title="Change Password">
+                    <i class="fa-solid fa-key"></i> Change Password
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MAIN APP CONTAINER -->
+    <div id="app-container" class="app-container hidden">
+        <!-- TOP NAVIGATION BAR -->
+        <header class="navbar">
+            <div class="nav-brand">
+                <div class="brand-logo">
+                    <i class="fa-solid fa-note-sticky"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>StickyNotes</h1>
+                    <span class="badge" id="notes-count">0 Notes</span>
+                </div>
+            </div>
+
+            <!-- SEARCH BAR -->
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="search-input" placeholder="Search notes...">
+                <button id="clear-search-btn" class="clear-search hidden"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <!-- TOP NAVBAR ACTIONS -->
+            <div class="nav-actions">
+                <!-- Color Filter Pills -->
+                <div class="color-filters" id="color-filters">
+                    <button class="color-pill active" data-color="all" title="Show All">All</button>
+                    <button class="color-pill" data-color="yellow" style="background:#fde047; border-color:#fde047;" title="Yellow Text"></button>
+                    <button class="color-pill" data-color="green" style="background:#4ade80; border-color:#4ade80;" title="Green Text"></button>
+                    <button class="color-pill" data-color="blue" style="background:#60a5fa; border-color:#60a5fa;" title="Blue Text"></button>
+                    <button class="color-pill" data-color="pink" style="background:#f472b6; border-color:#f472b6;" title="Pink Text"></button>
+                    <button class="color-pill" data-color="purple" style="background:#c084fc; border-color:#c084fc;" title="Purple Text"></button>
+                </div>
+
+                <!-- ADD NEW NOTE BUTTON -->
+                <button id="add-note-btn" class="btn btn-primary">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>New Note</span>
+                </button>
+
+                <!-- TOP NAVBAR DELETE SYMBOL / BUTTON -->
+                <button id="nav-delete-btn" class="btn btn-danger" title="Delete selected text or selected notes">
+                    <i class="fa-solid fa-trash-can"></i>
+                    <span id="nav-delete-text">Delete</span>
+                    <span id="select-counter" class="select-badge hidden">0</span>
+                </button>
+
+                <!-- SELECT ALL TOGGLE -->
+                <button id="select-all-btn" class="btn btn-secondary" title="Select / Deselect All Notes">
+                    <i class="fa-solid fa-list-check"></i>
+                    <span>Select All</span>
+                </button>
+
+                <!-- CHANGE PASSWORD BUTTON -->
+                <button id="nav-change-pass-btn" class="btn btn-icon" title="Change Password">
+                    <i class="fa-solid fa-key"></i>
+                </button>
+
+                <!-- LOCK APP BUTTON -->
+                <button id="lock-app-btn" class="btn btn-icon" title="Lock App">
+                    <i class="fa-solid fa-lock"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- SUB HEADER / SELECTION STATUS TOOLBAR -->
+        <div id="selection-bar" class="selection-bar hidden">
+            <span id="selection-status-text">0 items selected</span>
+            <div class="selection-actions">
+                <button id="bar-delete-btn" class="btn btn-danger btn-sm">
+                    <i class="fa-solid fa-trash"></i> Delete Selected
+                </button>
+                <button id="bar-cancel-btn" class="btn btn-secondary btn-sm">Cancel</button>
+            </div>
+        </div>
+
+        <!-- MAIN STICKY NOTES GRID -->
+        <main class="main-content">
+            <div id="notes-grid" class="notes-grid">
+                <!-- Notes will be populated dynamically -->
+            </div>
+            
+            <div id="empty-state" class="empty-state hidden">
+                <i class="fa-regular fa-sticky-note"></i>
+                <h3>No Notes Found</h3>
+                <p>Click "+ New Note" button to create your sticky note.</p>
+                <button class="btn btn-primary" onclick="document.getElementById('add-note-btn').click()">
+                    <i class="fa-solid fa-plus"></i> Create Note
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <!-- CHANGE PASSWORD MODAL -->
+    <div id="change-password-modal" class="modal-backdrop hidden">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-icon" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">
+                    <i class="fa-solid fa-key"></i>
+                </div>
+                <div>
+                    <h3>Change Password</h3>
+                    <p>Enter details to update your password</p>
+                </div>
+                <button id="close-change-pass-modal-btn" class="modal-close"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="change-password-form" onsubmit="return false;">
+                    <div class="input-group">
+                        <i class="fa-solid fa-lock-open input-icon"></i>
+                        <input type="password" id="old-password-input" placeholder="Enter old password..." autocomplete="off">
+                    </div>
+                    <div class="input-group">
+                        <i class="fa-solid fa-lock input-icon"></i>
+                        <input type="password" id="change-new-password-input" placeholder="Enter new password..." autocomplete="off">
+                    </div>
+                    <div class="input-group">
+                        <i class="fa-solid fa-shield-halved input-icon"></i>
+                        <input type="password" id="change-confirm-password-input" placeholder="Confirm new password..." autocomplete="off">
+                    </div>
+                    <div id="change-pass-error-message" class="error-message">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Old password is incorrect!
+                    </div>
+                    <div class="modal-actions" style="grid-template-columns: 1fr 1fr; margin-top: 16px;">
+                        <button type="button" id="cancel-change-pass-btn" class="btn btn-secondary" style="justify-content: center;">Cancel</button>
+                        <button type="submit" id="submit-change-pass-btn" class="btn btn-primary" style="background: linear-gradient(135deg, #f59e0b, #d97706); justify-content: center;">
+                            <span>Update Password</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAST2SMS REAL SMS & WHATSAPP OTP FORGOT PASSWORD MODAL -->
+    <div id="sms-forgot-modal" class="modal-backdrop hidden">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-icon" style="background: rgba(99, 102, 241, 0.15); color: #818cf8;">
+                    <i class="fa-solid fa-mobile-screen-button"></i>
+                </div>
+                <div>
+                    <h3>Real Phone OTP Dispatcher</h3>
+                    <p style="font-family: var(--font-mono); font-size: 11px;">Fast2SMS + WhatsApp Direct Gateway</p>
+                </div>
+                <button id="close-sms-modal-btn" class="modal-close"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="modal-body">
+                <!-- STEP 1: AUTO-DETECTED REGISTERED PHONE & DISPATCH OPTIONS -->
+                <div id="sms-step-1">
+                    <div class="url-display-box" style="margin-bottom: 16px; border-color: rgba(129, 140, 248, 0.4);">
+                        <i class="fa-solid fa-phone" style="color: #818cf8;"></i>
+                        <span id="registered-phone-display" style="font-weight: 700; letter-spacing: 1px;">+91 XXXXXXXXXX</span>
+                    </div>
+
+                    <button id="send-sms-code-btn" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 13px; margin-bottom: 10px;">
+                        <i class="fa-solid fa-paper-plane"></i> Send Fast2SMS Real SMS OTP
+                    </button>
+
+                    <!-- WHATSAPP & MOBILE SMS INSTANT DISPATCH -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                        <button id="send-wa-direct-btn" class="btn btn-secondary" style="padding: 10px 8px; font-size: 11px; background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); justify-content: center;">
+                            <i class="fa-brands fa-whatsapp"></i> Send via WhatsApp
+                        </button>
+                        <button id="send-native-sms-btn" class="btn btn-secondary" style="padding: 10px 8px; font-size: 11px; background: rgba(14, 165, 233, 0.15); color: #38bdf8; border: 1px solid rgba(14, 165, 233, 0.3); justify-content: center;">
+                            <i class="fa-solid fa-comment-sms"></i> Mobile SMS App
+                        </button>
+                    </div>
+                </div>
+
+                <!-- STEP 2: VERIFY SECRET 6-DIGIT OTP -->
+                <div id="sms-step-2" class="hidden">
+                    <div class="url-display-box" style="margin-bottom: 12px; font-size: 12px;">
+                        <i class="fa-solid fa-comment-sms"></i> Real OTP sent to <b id="target-phone-span">+91 XXXXXXXXXX</b>
+                        <div id="otp-timer-display" style="color: #f43f5e; font-weight: 700; margin-top: 4px;">Expires in 5 minutes</div>
+                    </div>
+                    <div class="input-group">
+                        <i class="fa-solid fa-key input-icon"></i>
+                        <input type="text" id="sms-code-input" placeholder="Enter 6-digit OTP..." maxlength="6" style="letter-spacing: 4px; font-size: 18px; font-weight: 700; text-align: center;">
+                    </div>
+                    <div id="sms-code-error" class="error-message">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Invalid OTP Code!
+                    </div>
+                    <button id="verify-sms-code-btn" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 12px; margin-top: 10px;">
+                        <i class="fa-solid fa-check-double"></i> Verify OTP
+                    </button>
+                    <div style="text-align: center; margin-top: 10px; display: flex; justify-content: center; gap: 8px;">
+                        <button id="resend-sms-code-btn" class="btn btn-secondary btn-sm" style="font-size: 11px;">Resend Fast2SMS</button>
+                        <button id="resend-wa-btn" class="btn btn-secondary btn-sm" style="font-size: 11px; color:#4ade80;">WhatsApp OTP</button>
+                    </div>
+                </div>
+
+                <!-- STEP 3: RESET NEW PASSWORD -->
+                <div id="sms-step-3" class="hidden">
+                    <form id="reset-password-form" onsubmit="return false;">
+                        <div class="input-group">
+                            <i class="fa-solid fa-lock input-icon"></i>
+                            <input type="password" id="reset-new-pass-input" placeholder="Enter new password..." autocomplete="off">
+                        </div>
+                        <div class="input-group">
+                            <i class="fa-solid fa-shield-halved input-icon"></i>
+                            <input type="password" id="reset-confirm-pass-input" placeholder="Confirm new password..." autocomplete="off">
+                        </div>
+                        <div id="reset-pass-error" class="error-message">
+                            <i class="fa-solid fa-triangle-exclamation"></i> Passwords do not match!
+                        </div>
+                        <button type="submit" id="save-reset-pass-btn" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 12px; margin-top: 10px;">
+                            <span>Save New Password</span>
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- LINK ACTION MODAL (Pop-up when a link is clicked inside a note) -->
+    <div id="link-modal" class="modal-backdrop hidden">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-icon">
+                    <i class="fa-solid fa-link"></i>
+                </div>
+                <div>
+                    <h3>Link Options</h3>
+                    <p>Choose an action for this URL</p>
+                </div>
+                <button id="close-link-modal-btn" class="modal-close"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="url-display-box">
+                    <i class="fa-solid fa-globe"></i>
+                    <span id="modal-url-text" class="url-text">https://example.com</span>
+                </div>
+                <div class="modal-actions">
+                    <button id="copy-link-btn" class="btn btn-copy">
+                        <i class="fa-solid fa-copy"></i>
+                        <span>Copy Link</span>
+                    </button>
+                    <button id="open-link-btn" class="btn btn-open">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        <span>Open Link</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
